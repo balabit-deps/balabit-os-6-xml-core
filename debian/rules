@@ -1,0 +1,64 @@
+#!/usr/bin/make -f
+## ----------------------------------------------------------------------
+## debian/rules : package script for xml-core
+## ----------------------------------------------------------------------
+
+## ----------------------------------------------------------------------
+## uncomment this to turn on verbose mode
+#export DH_VERBOSE=1
+
+## ----------------------------------------------------------------------
+PACKAGE		= xml-core
+
+## ----------------------------------------------------------------------
+## targets
+
+clean:
+		dh_testdir
+		dh_testroot
+		rm -f tools/update-xmlcatalog.8 debhelper/dh_installxmlcatalogs.1
+		dh_clean tools/update-xmlcatalog.8 \
+		    debhelper/dh_installxmlcatalogs.1 \
+		    build-stamp install-stamp
+
+build:		build-stamp
+build-stamp:
+		dh_testdir
+		$(MAKE)
+		touch build-stamp
+
+install:	install-stamp
+install-stamp:	build
+		dh_testdir
+		dh_testroot
+		dh_clean -k
+		dh_installdirs
+		$(MAKE) install prefix=$(CURDIR)/debian/$(PACKAGE)/usr
+		touch install-stamp
+
+binary-indep:	build install
+		dh_testdir
+		dh_testroot
+		dh_installdocs
+		dh_installexamples
+		dh_installchangelogs
+		dh_install
+		DH_AUTOSCRIPTDIR=debhelper debhelper/dh_installxmlcatalogs
+		dh_installcatalogs
+		dh_link
+		dh_usrlocal
+		dh_compress
+		dh_fixperms
+		dh_installdeb
+		dh_perl -d
+		dh_gencontrol
+		dh_md5sums
+		dh_builddeb
+
+binary-arch:
+
+binary:		binary-indep binary-arch
+
+.PHONY:		clean build install binary-indep binary-arch binary
+
+## ----------------------------------------------------------------------
